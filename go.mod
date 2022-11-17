@@ -3,18 +3,17 @@ module github.com/its-me-debk007/auth-backend
 go 1.19
 
 require (
-	github.com/cloudinary/cloudinary-go v1.7.0
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/its-me-debk007/Akatsuki_backend v0.0.0-20221117020153-2b5b98948444
-	github.com/joho/godotenv v1.4.0
 	golang.org/x/crypto v0.3.0
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/gorm v1.24.1
 )
 
 require (
+	github.com/cloudinary/cloudinary-go v1.7.0 // indirect
 	github.com/creasty/defaults v1.5.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
