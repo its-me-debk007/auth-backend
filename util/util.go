@@ -2,18 +2,13 @@ package util
 
 import (
 	"bytes"
-	"context"
 	"errors"
-	"fmt"
 	"html/template"
 	"log"
-	"mime/multipart"
 	"net/smtp"
 	"os"
 	"time"
 
-	"github.com/cloudinary/cloudinary-go"
-	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/its-me-debk007/Akatsuki_backend/database"
