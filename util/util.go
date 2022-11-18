@@ -52,7 +52,8 @@ func ParseToken(tokenString string, typeShouldBeAccess bool) (string, error) {
 	})
 
 	var errorMsg string
-	db := database.DB.First(&model.User{}, "username = ?", registeredClaims.Issuer)
+	var user model.User
+	db := database.DB.First(&user, "email = ?", registeredClaims.Issuer)
 
 	switch {
 	case err != nil:
@@ -75,7 +76,7 @@ func ParseToken(tokenString string, typeShouldBeAccess bool) (string, error) {
 		return "", errors.New(errorMsg)
 	}
 
-	return registeredClaims.Issuer, nil
+	return user.Name, nil
 }
 
 func IsValidPassword(password string) string {

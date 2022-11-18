@@ -14,4 +14,6 @@ func SetupRoutes(app *gin.Engine) {
 		apiGroup.POST("/verify", controller.VerifyOtp)
 		apiGroup.POST("/reset", controller.ResetPassword)
 	}
+
+	app.GET("/api/v1", controller.Home)
 }
