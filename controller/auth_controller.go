@@ -1,16 +1,15 @@
 package controller
 
 import (
-	"log"
 	"math/rand"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/its-me-debk007/Akatsuki_backend/database"
-	"github.com/its-me-debk007/Akatsuki_backend/model"
-	"github.com/its-me-debk007/Akatsuki_backend/util"
+	"github.com/its-me-debk007/auth-backend/database"
+	"github.com/its-me-debk007/auth-backend/model"
+	"github.com/its-me-debk007/auth-backend/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -46,13 +45,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := util.GenerateToken(user.Username, "ACCESS", 24*7)
+	accessToken, err := util.GenerateToken(user.Email, "ACCESS", 24*7)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadGateway, model.Message{err.Error()})
 		return
 	}
 
-	refreshToken, err := util.GenerateToken(user.Username, "REFRESH", 1)
+	refreshToken, err := util.GenerateToken(user.Email, "REFRESH", 1)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadGateway, model.Message{err.Error()})
 		return
@@ -74,7 +73,6 @@ func Signup(c *gin.Context) {
 
 	input.Email = strings.TrimSpace(input.Email)
 	input.Email = strings.ToLower(input.Email)
-	input.Username = strings.TrimSpace(input.Username)
 	input.Name = strings.TrimSpace(input.Name)
 	input.Password = strings.TrimSpace(input.Password)
 
@@ -92,16 +90,7 @@ func Signup(c *gin.Context) {
 	input.Password = string(hashedPassword)
 
 	if err := database.DB.Create(&input); err.Error != nil {
-		var msg string
-		log.Println("\n" + err.Error.Error() + "\n")
-
-		if err.Error.Error()[61:66] == "email" {
-			msg = "email already registered"
-		} else {
-			msg = "username already taken"
-		}
-
-		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{msg})
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"email already registered"})
 		return
 	}
 
@@ -127,11 +116,11 @@ func VerifyOtp(c *gin.Context) {
 	database.DB.First(&otpStruct, "email = ?", input.Email)
 
 	if otpStruct.Email == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp not generated yet"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp not generated for this email"})
 		return
 	}
 
-	if timeDiff := time.Now().Sub(otpStruct.CreatedAt); timeDiff > (time.Minute * 5) {
+	if timeDiff := time.Since(otpStruct.CreatedAt); timeDiff > (time.Minute * 5) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp expired"})
 		return
 	}
@@ -148,6 +137,7 @@ func VerifyOtp(c *gin.Context) {
 
 func ResetPassword(c *gin.Context) {
 	input := new(struct {
+		Otp      int    `json:"otp"    binding:"required"`
 		Email    string `json:"email"    binding:"required,email"`
 		Password string `json:"new_password"    binding:"required"`
 	})
@@ -160,6 +150,25 @@ func ResetPassword(c *gin.Context) {
 	input.Email = strings.TrimSpace(input.Email)
 	input.Email = strings.ToLower(input.Email)
 	input.Password = strings.TrimSpace(input.Password)
+
+	otpStruct := model.Otp{}
+
+	database.DB.First(&otpStruct, "email = ?", input.Email)
+
+	if otpStruct.Email == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp not generated for this email"})
+		return
+	}
+
+	if timeDiff := time.Since(otpStruct.CreatedAt); timeDiff > (time.Minute * 5) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp expired"})
+		return
+	}
+
+	if otpStruct.Otp != input.Otp {
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp incorrect"})
+		return
+	}
 
 	if validation := util.IsValidPassword(input.Password); validation != "ok" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{validation})

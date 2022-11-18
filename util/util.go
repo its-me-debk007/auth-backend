@@ -11,8 +11,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/its-me-debk007/Akatsuki_backend/database"
-	"github.com/its-me-debk007/Akatsuki_backend/model"
+	"github.com/its-me-debk007/auth-backend/database"
+	"github.com/its-me-debk007/auth-backend/model"
 )
 
 const (
