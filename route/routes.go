@@ -6,7 +6,7 @@ import (
 )
 
 func SetupRoutes(app *gin.Engine) {
-	apiGroup := app.Group("/api/v1")
+	apiGroup := app.Group("/api/v1/auth")
 	{
 		apiGroup.POST("/login", controller.Login)
 		apiGroup.POST("/signup", controller.Signup)
