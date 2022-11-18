@@ -113,9 +113,7 @@ func VerifyOtp(c *gin.Context) {
 
 	otpStruct := model.Otp{}
 
-	database.DB.First(&otpStruct, "email = ?", input.Email)
-
-	if otpStruct.Email == "" {
+	if db := database.DB.First(&otpStruct, "email = ?", input.Email); db.Error != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp not generated for this email"})
 		return
 	}
