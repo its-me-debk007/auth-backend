@@ -32,7 +32,7 @@ func Login(c *gin.Context) {
 	var user model.User
 
 	if db := database.DB.First(&user, "email = ?", input.Email); db.Error != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"no account found with given credentials"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"no account found"})
 		return
 	}
 

@@ -16,7 +16,7 @@ func main() {
 
 	app := gin.Default()
 
-	app.Use(gin.Recovery())
+	// app.Use(gin.Recovery())
 
 	app.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
