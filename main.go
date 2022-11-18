@@ -9,12 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/its-me-debk007/auth-backend/database"
 	"github.com/its-me-debk007/auth-backend/route"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// if err := godotenv.Load(".env"); err != nil {
-	// 	log.Fatalln("ENV LOADING ERROR", err.Error())
-	// }
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatalln("ENV LOADING ERROR", err.Error())
+	}
 
 	database.ConnectDatabase()
 

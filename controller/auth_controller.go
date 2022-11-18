@@ -94,7 +94,22 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, model.Message{"successfully signed up"})
+	otp := rand.Intn(900000) + 100000
+
+	go util.SendEmail(input.Email, otp)
+
+	otpStruct := model.Otp{
+		Email:     input.Email,
+		SignUpOtp: otp,
+		CreatedAt: time.Now(),
+	}
+
+	if db := database.DB.Save(&otpStruct); db.Error != nil {
+		c.AbortWithStatusJSON(http.StatusBadGateway, model.Message{db.Error.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.Message{"successfully signed up and sent otp"})
 }
 
 func VerifyOtp(c *gin.Context) {
@@ -123,7 +138,7 @@ func VerifyOtp(c *gin.Context) {
 		return
 	}
 
-	if otpStruct.Otp != input.Otp {
+	if otpStruct.SignUpOtp != input.Otp {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp incorrect"})
 		return
 	}
@@ -163,7 +178,7 @@ func ResetPassword(c *gin.Context) {
 		return
 	}
 
-	if otpStruct.Otp != input.Otp {
+	if otpStruct.ResetPasswordOtp != input.Otp {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp incorrect"})
 		return
 	}
@@ -201,9 +216,7 @@ func SendOtp(c *gin.Context) {
 
 	var user model.User
 
-	database.DB.First(&user, "email = ?", input.Email)
-
-	if user.Email == "" {
+	if db := database.DB.First(&user, "email = ?", input.Email); db.Error != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"user not registered"})
 		return
 	}
@@ -213,9 +226,10 @@ func SendOtp(c *gin.Context) {
 	go util.SendEmail(input.Email, otp)
 
 	otpStruct := model.Otp{
-		Email:     input.Email,
-		Otp:       otp,
-		CreatedAt: time.Now(),
+		Email:            input.Email,
+		CreatedAt:        time.Now(),
+		ResetPasswordOtp: otp,
+		SignUpOtp:        0,
 	}
 
 	if db := database.DB.Save(&otpStruct); db.Error != nil {
