@@ -13,6 +13,7 @@ func Home(c *gin.Context) {
 	header := c.GetHeader("Authorization")
 	if header == "" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, model.Message{"no token provided"})
+		return
 	}
 
 	token := header[7:]
