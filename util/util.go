@@ -118,7 +118,7 @@ func IsValidPassword(password string) string {
 	}
 }
 
-func SendEmail(receiverEmail string, otp int) {
+func SendEmail(receiverEmail string, otp int64) {
 	log.Printf("OTP for %s:- %d\n", receiverEmail, otp)
 
 	senderEmail := os.Getenv("SENDER_EMAIL")

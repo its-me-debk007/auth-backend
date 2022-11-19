@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"net/http"
 	"strings"
 	"time"
@@ -94,7 +95,10 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	otp := rand.Intn(900000) + 100000
+	bigIntOtp, _ := rand.Int(rand.Reader, big.NewInt(900000))
+	bigIntOtp.Add(bigIntOtp, big.NewInt(100000))
+
+	otp := bigIntOtp.Int64()
 
 	go util.SendEmail(input.Email, otp)
 
@@ -138,7 +142,7 @@ func VerifyOtp(c *gin.Context) {
 		return
 	}
 
-	if otpStruct.SignUpOtp != input.Otp {
+	if otpStruct.SignUpOtp != int64(input.Otp) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp incorrect"})
 		return
 	}
@@ -178,7 +182,7 @@ func ResetPassword(c *gin.Context) {
 		return
 	}
 
-	if otpStruct.ResetPasswordOtp != input.Otp {
+	if otpStruct.ResetPasswordOtp != int64(input.Otp) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"otp incorrect"})
 		return
 	}
@@ -221,7 +225,10 @@ func SendOtp(c *gin.Context) {
 		return
 	}
 
-	otp := rand.Intn(900000) + 100000
+	bigIntOtp, _ := rand.Int(rand.Reader, big.NewInt(900000))
+	bigIntOtp.Add(bigIntOtp, big.NewInt(100000))
+
+	otp := bigIntOtp.Int64()
 
 	go util.SendEmail(input.Email, otp)
 
