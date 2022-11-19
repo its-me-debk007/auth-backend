@@ -16,4 +16,6 @@ func SetupRoutes(app *gin.Engine) {
 	}
 
 	app.GET("/api/v1", controller.Home)
+
+	app.NoRoute(controller.NoRoute)
 }

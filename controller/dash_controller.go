@@ -26,3 +26,7 @@ func Home(c *gin.Context) {
 
 	c.JSON(http.StatusOK, model.Message{fmt.Sprintf("Hello, %s!", name)})
 }
+
+func NoRoute(c *gin.Context) {
+	c.JSON(http.StatusNotFound, model.Message{"page not found"})
+}
