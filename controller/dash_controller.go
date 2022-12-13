@@ -28,5 +28,5 @@ func Home(c *gin.Context) {
 }
 
 func NoRoute(c *gin.Context) {
-	c.JSON(http.StatusNotFound, model.Message{"page not found"})
+	c.JSON(http.StatusNotFound, model.Message{"route not found"})
 }

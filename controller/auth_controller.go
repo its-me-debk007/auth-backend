@@ -207,7 +207,8 @@ func ResetPassword(c *gin.Context) {
 
 func SendOtp(c *gin.Context) {
 	input := new(struct {
-		Email string `json:"email"    binding:"required,email"`
+		Email     string `json:"email"    binding:"required,email"`
+		ForSignUp bool   `json:"for_signup"`
 	})
 
 	if err := c.ShouldBindJSON(input); err != nil {
@@ -225,6 +226,16 @@ func SendOtp(c *gin.Context) {
 		return
 	}
 
+	if !user.IsVerified && !input.ForSignUp {
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"user not verified for changing password"})
+		return
+	}
+
+	if user.IsVerified && input.ForSignUp {
+		c.AbortWithStatusJSON(http.StatusBadRequest, model.Message{"user already signed up"})
+		return
+	}
+
 	bigIntOtp, _ := rand.Int(rand.Reader, big.NewInt(900000))
 	bigIntOtp.Add(bigIntOtp, big.NewInt(100000))
 
@@ -232,11 +243,22 @@ func SendOtp(c *gin.Context) {
 
 	go util.SendEmail(input.Email, otp)
 
-	otpStruct := model.Otp{
-		Email:            input.Email,
-		CreatedAt:        time.Now(),
-		ResetPasswordOtp: otp,
-		SignUpOtp:        0,
+	var otpStruct model.Otp
+
+	if input.ForSignUp {
+		otpStruct = model.Otp{
+			Email:     input.Email,
+			CreatedAt: time.Now(),
+			SignUpOtp: otp,
+		}
+
+	} else {
+		otpStruct = model.Otp{
+			Email:            input.Email,
+			CreatedAt:        time.Now(),
+			ResetPasswordOtp: otp,
+			SignUpOtp:        0,
+		}
 	}
 
 	if db := database.DB.Save(&otpStruct); db.Error != nil {
